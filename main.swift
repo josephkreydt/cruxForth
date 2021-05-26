@@ -27,6 +27,14 @@ func processInput(input_array: [String]) -> Bool {
 				return false
 			} else if input == "+" {
 				add()
+			} else if input == "-" {
+				subtract()
+			} else if input == "*" {
+				multiply()
+			} else if input == "/" {
+				divide()
+			} else if input == "pop" {
+				pop()
 			}
 		}
 	}
@@ -39,4 +47,33 @@ func add() {
 	let sum: Int = topWord + secondWord
 	intStack.append(sum)
 	print(sum)
+}
+
+func subtract() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	let difference: Int = secondWord - topWord
+	intStack.append(difference)
+	print(difference)
+}
+
+func multiply() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	let product: Int = secondWord * topWord
+	intStack.append(product)
+	print(product)
+}
+
+func divide() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	let dividend: Int = secondWord / topWord
+	intStack.append(dividend)
+	print(dividend)
+}
+
+func pop() {
+	let topWord: Int = intStack.removeLast()
+	print(topWord)
 }
