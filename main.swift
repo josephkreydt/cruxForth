@@ -1,5 +1,29 @@
 import Foundation
 
+extension StringProtocol {
+    func index<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
+        range(of: string, options: options)?.lowerBound
+    } // add ability to get index of a string rather than just a single character
+    func endIndex<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
+        range(of: string, options: options)?.upperBound
+    }
+    func indices<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Index] {
+        ranges(of: string, options: options).map(\.lowerBound)
+    }
+    func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var startIndex = self.startIndex
+        while startIndex < endIndex,
+            let range = self[startIndex...]
+                .range(of: string, options: options) {
+                result.append(range)
+                startIndex = range.lowerBound < range.upperBound ? range.upperBound :
+                    index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
+    }
+} // extension brought to you by: https://stackoverflow.com/questions/32305891/index-of-a-substring-in-a-string-with-swift
+
 print("Welcome to cruxForth\n>>>>", terminator:"")
 
 var intStack: [Int] = []
@@ -55,6 +79,7 @@ func processInput(input_array: [String]) -> Bool {
 					print("not in compile mode")
 				} else if compiledWords.contains(":::: " + input) {
 					print("exists in dict")
+					runWord(word: input)
 				}
 			}
 		}
@@ -111,4 +136,18 @@ func compile(input: String) {
 func endCompile() {
 	compiledWords.append(" ;;;; ")
 	compileFlag = false
+}
+
+func runWord(word: String) {
+	let formattedWord: String = ":::: " + word + " "
+	var fullDefinition: String.SubSequence = ""
+	var definition: String.SubSequence = ""
+	
+	if let wordIndex = compiledWords.endIndex(of: formattedWord) {
+		fullDefinition = compiledWords[wordIndex...]
+	}
+	if let wordIndex = fullDefinition.index(of: ";") {
+		definition = fullDefinition[..<wordIndex]
+	}
+	print(definition)
 }
