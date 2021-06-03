@@ -33,7 +33,7 @@ var compiledWords: String = ""
 while let input = readLine() {
 	let input_array = input.components(separatedBy: " ")
 	
-	if processInput(input_array: input_array) {
+	if processInput(input_array: input_array, compiled: false) {
 		print("ok.")
 	} else {
 		break
@@ -41,7 +41,7 @@ while let input = readLine() {
 	print(">>>>", terminator:"")
 }
 
-func processInput(input_array: [String]) -> Bool {
+func processInput(input_array: [String], compiled: Bool) -> Bool {
 	for input in input_array {
 		
 		if compileFlag == true {
@@ -77,9 +77,16 @@ func processInput(input_array: [String]) -> Bool {
 					print(compiledWords)
 				} else if input == ";" {
 					print("not in compile mode")
-				} else if compiledWords.contains(":::: " + input) {
+				} else if compiledWords.contains(":::: " + input) && compiled == true {
+					print("exists in dict.")
+				} else if compiledWords.contains(":::: " + input) && compiled == false {
 					print("exists in dict")
-					runWord(word: input)
+					if runWord(word: input) {
+						break
+					} else {
+						print("Error running compiled word.")
+						break
+					}
 				}
 			}
 		}
@@ -138,7 +145,7 @@ func endCompile() {
 	compileFlag = false
 }
 
-func runWord(word: String) {
+func runWord(word: String) -> Bool {
 	let formattedWord: String = ":::: " + word + " "
 	var fullDefinition: String.SubSequence = ""
 	var definition: String.SubSequence = ""
@@ -149,5 +156,14 @@ func runWord(word: String) {
 	if let wordIndex = fullDefinition.index(of: ";") {
 		definition = fullDefinition[..<wordIndex]
 	}
-	print(definition)
+	//print(definition)
+	
+	let input_array = definition.components(separatedBy: " ")
+	if processInput(input_array: input_array, compiled: true) {
+		print("ok.")
+	} else {
+		print("Error processing compiled word.")
+		return false
+	}
+	return true
 }
