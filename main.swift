@@ -31,27 +31,44 @@ var compileFlag: Bool = false
 var compiledWords: String = ""
 
 while let input = readLine() {
-	let input_array = input.components(separatedBy: " ")
+	var input_array = input.components(separatedBy: " ")
+
+	let returnCode = processInput(input_array: input_array, compiled: false)
 	
-	if processInput(input_array: input_array, compiled: false) {
+	if returnCode == 1 {
 		print("ok.")
-	} else {
+	} else if returnCode == 0 {
 		break
+	} else if returnCode == 2 {
+		print("Due to error, input was not processed.")
+		input_array = []
 	}
+	
 	print(">>>>", terminator:"")
 }
 
-func processInput(input_array: [String], compiled: Bool) -> Bool {
-	for input in input_array {
-		
+func processInput(input_array: [String], compiled: Bool) -> Int {
+	for (index, input) in input_array.enumerated() {
 		if compileFlag == true {
 			if input == "compiler" {
 				print(compiledWords)
 			} else if input == ";" {
 				endCompile()
 			} else {
-				compile(input: input)
+				if input_array[index - 1] == ":" {
+					if Int(input) != nil {
+						print("Error: word name cannot be an integer.")
+						compileFlag = false
+						compiledWords.removeLast(4)
+						return 2
+					} else {
+						compile(input: input)
+					}
+				} else {
+					compile(input: input)
+				}
 			}
+			
 		} else {
 			if Int(input) != nil {
 				intStack.append(Int(input) ?? 0)
@@ -60,7 +77,7 @@ func processInput(input_array: [String], compiled: Bool) -> Bool {
 				if input == "show" {
 					print(intStack)
 				} else if input == "bye" {
-					return false
+					return 0
 				} else if input == "+" {
 					add()
 				} else if input == "-" {
@@ -91,7 +108,7 @@ func processInput(input_array: [String], compiled: Bool) -> Bool {
 			}
 		}
 	}
-	return true
+	return 1
 }
 
 func add() {
@@ -159,10 +176,13 @@ func runWord(word: String) -> Bool {
 	//print(definition)
 	
 	let input_array = definition.components(separatedBy: " ")
-	if processInput(input_array: input_array, compiled: true) {
+	if processInput(input_array: input_array, compiled: true) == 1 {
 		print("ok.")
-	} else {
+	} else if processInput(input_array: input_array, compiled: true) == 2 {
 		print("Error processing compiled word.")
+		return false
+	} else if processInput(input_array: input_array, compiled: true) == 0 {
+		print("bye")
 		return false
 	}
 	return true
