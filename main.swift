@@ -54,8 +54,10 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 				print(compiledWords)
 			} else if input == ";" {
 				endCompile()
+			} else if input == ":" {
+				print("Already in compile mode. Ingoring (:) operator.")
 			} else {
-				if input_array[index - 1] == ":" {
+				if index > 1 && input_array[index - 1] == ":" {
 					if Int(input) != nil {
 						print("Error: word name cannot be an integer.")
 						compileFlag = false
@@ -94,16 +96,17 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 					print(compiledWords)
 				} else if input == ";" {
 					print("not in compile mode")
-				} else if compiledWords.contains(":::: " + input) && compiled == true {
-					print("exists in dict.")
-				} else if compiledWords.contains(":::: " + input) && compiled == false {
-					print("exists in dict")
+				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
+				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
 					if runWord(word: input) {
 						break
 					} else {
 						print("Error running compiled word.")
 						break
 					}
+				} else if input == "" {
+				} else {
+					print("no matching word in dictionary for: " + input)
 				}
 			}
 		}
@@ -182,7 +185,7 @@ func runWord(word: String) -> Bool {
 		print("Error processing compiled word.")
 		return false
 	} else if processInput(input_array: input_array, compiled: true) == 0 {
-		print("bye")
+		print("Compiled word contains 'bye'. Ending cruxForth.")
 		return false
 	}
 	return true
