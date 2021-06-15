@@ -35,8 +35,10 @@ while let input = readLine() {
 
 	let returnCode = processInput(input_array: input_array, compiled: false)
 	
-	if returnCode == 1 {
+	if returnCode == 1 && compileFlag == false {
 		print("ok.")
+	} else if returnCode == 1 && compileFlag == true {
+		print("compiled.")
 	} else if returnCode == 0 {
 		break
 	} else if returnCode == 2 {
@@ -57,13 +59,14 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 			} else if input == ":" {
 				print("Already in compile mode. Ingoring (:) operator.")
 			} else {
-				if index > 1 && input_array[index - 1] == ":" {
+				if index > 0 && input_array[index - 1] == ":" {
 					if Int(input) != nil {
 						print("Error: word name cannot be an integer.")
 						compileFlag = false
 						compiledWords.removeLast(4)
 						return 2
 					} else {
+						clearCompiledWord(word: input)
 						compile(input: input)
 					}
 				} else {
@@ -98,11 +101,18 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 					print("not in compile mode")
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
-					if runWord(word: input) {
-						break
+					let runWordReturnCode = runWord(word: input)
+					
+					if runWordReturnCode == 0 {
+						return 0
+					} else if runWordReturnCode == 1 {
+						return 1
+					} else if runWordReturnCode == 2 {
+						print("Error running compiled word.")
+						return 2
 					} else {
 						print("Error running compiled word.")
-						break
+						return 2
 					}
 				} else if input == "" {
 				} else {
@@ -165,7 +175,7 @@ func endCompile() {
 	compileFlag = false
 }
 
-func runWord(word: String) -> Bool {
+func runWord(word: String) -> Int {
 	let formattedWord: String = ":::: " + word + " "
 	var fullDefinition: String.SubSequence = ""
 	var definition: String.SubSequence = ""
@@ -179,14 +189,35 @@ func runWord(word: String) -> Bool {
 	//print(definition)
 	
 	let input_array = definition.components(separatedBy: " ")
-	if processInput(input_array: input_array, compiled: true) == 1 {
-		print("ok.")
-	} else if processInput(input_array: input_array, compiled: true) == 2 {
+	let returnCodeRW = processInput(input_array: input_array, compiled: true)
+	if returnCodeRW == 1 {
+		return 1
+	} else if returnCodeRW == 2 {
 		print("Error processing compiled word.")
-		return false
-	} else if processInput(input_array: input_array, compiled: true) == 0 {
+		return 2
+	} else if returnCodeRW == 0 {
 		print("Compiled word contains 'bye'. Ending cruxForth.")
-		return false
+		return 0
+	} else {
+		print("Error processing compiled word.")
+		return 2
 	}
-	return true
+}
+
+func clearCompiledWord(word: String) {
+	let formattedWord: String = ":::: " + word + " "
+	var fullDefinition: String.SubSequence = ""
+	var definition: String.SubSequence = ""
+	var toDelete: String.SubSequence = ""
+	
+	if let wordIndex = compiledWords.endIndex(of: formattedWord) {
+		fullDefinition = compiledWords[wordIndex...]
+		if let wordIndex = fullDefinition.index(of: ";") {
+			definition = fullDefinition[..<wordIndex]
+		}
+		toDelete = formattedWord + definition + ";;;; "
+		let newCompiledWords = compiledWords.replacingOccurrences(of: toDelete, with: "")
+		compiledWords = newCompiledWords
+	} else {
+	}
 }
