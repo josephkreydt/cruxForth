@@ -102,7 +102,6 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
 					let runWordReturnCode = runWord(word: input)
-					
 					if runWordReturnCode == 0 {
 						return 0
 					} else if runWordReturnCode == 1 {
@@ -190,6 +189,7 @@ func runWord(word: String) -> Int {
 	
 	let input_array = definition.components(separatedBy: " ")
 	let returnCodeRW = processInput(input_array: input_array, compiled: true)
+	
 	if returnCodeRW == 1 {
 		return 1
 	} else if returnCodeRW == 2 {
@@ -218,6 +218,5 @@ func clearCompiledWord(word: String) {
 		toDelete = formattedWord + definition + ";;;; "
 		let newCompiledWords = compiledWords.replacingOccurrences(of: toDelete, with: "")
 		compiledWords = newCompiledWords
-	} else {
 	}
 }
