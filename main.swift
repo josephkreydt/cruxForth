@@ -95,11 +95,33 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 					pop()
 				} else if input == ":" {
 					startCompile()
+				} else if input == "immediate" {
+					let wordToRun = lastCompiledWord()
+					let runWordReturnCode = runWord(word: wordToRun)
+					if runWordReturnCode == 0 {
+						return 0
+					} else if runWordReturnCode == 1 {
+						return 1
+					} else if runWordReturnCode == 2 {
+						print("Error running compiled word.")
+						return 2
+					} else {
+						print("Error running compiled word.")
+						return 2
+					}
 				} else if input == "compiler" {
 					print(compiledWords)
 				} else if input == ";" {
 					print("not in compile mode")
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
+					let runWordReturnCode = runWord(word: input)
+					if runWordReturnCode == 0 {
+					} else if runWordReturnCode == 1 {
+					} else if runWordReturnCode == 2 {
+						print("Error running compiled word.")
+					} else {
+						print("Error running compiled word.")
+c					}
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
 					let runWordReturnCode = runWord(word: input)
 					if runWordReturnCode == 0 {
@@ -211,6 +233,7 @@ func clearCompiledWord(word: String) {
 	var toDelete: String.SubSequence = ""
 	
 	if let wordIndex = compiledWords.endIndex(of: formattedWord) {
+		print("redefined " + word + ".")
 		fullDefinition = compiledWords[wordIndex...]
 		if let wordIndex = fullDefinition.index(of: ";") {
 			definition = fullDefinition[..<wordIndex]
@@ -219,4 +242,20 @@ func clearCompiledWord(word: String) {
 		let newCompiledWords = compiledWords.replacingOccurrences(of: toDelete, with: "")
 		compiledWords = newCompiledWords
 	}
+}
+
+func lastCompiledWord() -> String {
+	var fullDefinition: String.SubSequence = ""
+	var definition: String.SubSequence = ""
+	var wordNameString: String = ""
+	
+	if let wordIndex = compiledWords.lastIndex(of: ":") {
+		fullDefinition = compiledWords[wordIndex...]
+		if let wordIndex = fullDefinition.endIndex(of: ": ") {
+			definition = fullDefinition[wordIndex...]
+			let definition_array = definition.components(separatedBy: " ")
+			wordNameString = definition_array[0]
+		}
+	}
+	return wordNameString
 }
