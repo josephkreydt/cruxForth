@@ -28,6 +28,7 @@ print("Welcome to cruxForth\n>>>>", terminator:"")
 
 var intStack: [Int] = []
 var compileFlag: Bool = false
+var commentFlag: Bool = false
 var compiledWords: String = ""
 
 while let input = readLine() {
@@ -51,14 +52,17 @@ while let input = readLine() {
 
 func processInput(input_array: [String], compiled: Bool) -> Int {
 	for (index, input) in input_array.enumerated() {
-		if compileFlag == true {
+		if compileFlag == true && commentFlag == false {
 			if input == "compiler" {
 				print(compiledWords)
 			} else if input == ";" {
 				endCompile()
 			} else if input == ":" {
 				print("Already in compile mode. Ingoring (:) operator.")
-			} else {
+			} else if input == "(" {
+				startComment()
+			}
+			else {
 				if index > 0 && input_array[index - 1] == ":" {
 					if Int(input) != nil {
 						print("Error: word name cannot be an integer.")
@@ -73,7 +77,10 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 					compile(input: input)
 				}
 			}
-			
+		} else if compileFlag == true && commentFlag == true {
+			if input == ")" {
+				endComment()
+			}
 		} else {
 			if Int(input) != nil {
 				intStack.append(Int(input) ?? 0)
@@ -121,7 +128,7 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 						print("Error running compiled word.")
 					} else {
 						print("Error running compiled word.")
-c					}
+					}
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
 					let runWordReturnCode = runWord(word: input)
 					if runWordReturnCode == 0 {
@@ -258,4 +265,12 @@ func lastCompiledWord() -> String {
 		}
 	}
 	return wordNameString
+}
+
+func startComment() {
+	commentFlag = true
+}
+
+func endComment() {
+	commentFlag = false
 }
