@@ -100,7 +100,28 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 					divide()
 				} else if input == "pop" {
 					pop()
-				} else if input == ":" {
+				} else if input == "=" {
+					equal()
+				} else if input == "<>" {
+					notEqual()
+				} else if input == "and" {
+					and()
+				} else if input == "or" {
+					or()
+				} else if input == ">" {
+					greaterThan()
+				} else if input == "<" {
+					lessThan()
+				} else if input == "dup" {
+					dup()
+				} else if input == "swap" {
+					swap()
+				} else if input == "2dup" {
+					twoDup()
+				} else if input == "rot" {
+					rot()
+				}
+				else if input == ":" {
 					startCompile()
 				} else if input == "immediate" {
 					let wordToRun = lastCompiledWord()
@@ -123,18 +144,20 @@ func processInput(input_array: [String], compiled: Bool) -> Int {
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
 					let runWordReturnCode = runWord(word: input)
 					if runWordReturnCode == 0 {
+						return 0
 					} else if runWordReturnCode == 1 {
 					} else if runWordReturnCode == 2 {
 						print("Error running compiled word.")
+						return 2
 					} else {
 						print("Error running compiled word.")
+						return 2
 					}
 				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
 					let runWordReturnCode = runWord(word: input)
 					if runWordReturnCode == 0 {
 						return 0
 					} else if runWordReturnCode == 1 {
-						return 1
 					} else if runWordReturnCode == 2 {
 						print("Error running compiled word.")
 						return 2
@@ -273,4 +296,98 @@ func startComment() {
 
 func endComment() {
 	commentFlag = false
+}
+
+func equal() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (topWord == secondWord) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func notEqual() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (topWord != secondWord) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func and() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (topWord == secondWord) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func or() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (topWord == -1 || secondWord == -1) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func greaterThan() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (secondWord > topWord) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func lessThan() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	if (secondWord < topWord) {
+		intStack.append(-1)
+	} else {
+		intStack.append(0)
+	}
+}
+
+func dup() {
+	let topWord: Int = intStack.removeLast()
+	intStack.append(topWord)
+	intStack.append(topWord)
+}
+
+func swap() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	intStack.append(topWord)
+	intStack.append(secondWord)
+}
+
+func twoDup() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	intStack.append(secondWord)
+	intStack.append(topWord)
+	intStack.append(secondWord)
+	intStack.append(topWord)
+}
+
+func rot() {
+	let topWord: Int = intStack.removeLast()
+	let secondWord: Int = intStack.removeLast()
+	let thirdWord: Int = intStack.removeLast()
+	intStack.append(secondWord)
+	intStack.append(topWord)
+	intStack.append(thirdWord)
+}
+
+func ifElse() {
 }
