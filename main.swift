@@ -30,6 +30,7 @@ var intStack: [Int] = []
 var compileFlag: Bool = false
 var commentFlag: Bool = false
 var compiledWords: String = ""
+var indicesToIgnore: [Int] = []
 
 while let input = readLine() {
 	var input_array = input.components(separatedBy: " ")
@@ -51,123 +52,135 @@ while let input = readLine() {
 }
 
 func processInput(input_array: [String], compiled: Bool) -> Int {
+	indicesToIgnore = []
+	var ifInputArray = input_array
+	
 	for (index, input) in input_array.enumerated() {
-		if compileFlag == true && commentFlag == false {
-			if input == "compiler" {
-				print(compiledWords)
-			} else if input == ";" {
-				endCompile()
-			} else if input == ":" {
-				print("Already in compile mode. Ingoring (:) operator.")
-			} else if input == "(" {
-				startComment()
-			}
-			else {
-				if index > 0 && input_array[index - 1] == ":" {
-					if Int(input) != nil {
-						print("Error: word name cannot be an integer.")
-						compileFlag = false
-						compiledWords.removeLast(4)
-						return 2
-					} else {
-						clearCompiledWord(word: input)
-						compile(input: input)
-					}
-				} else {
-					compile(input: input)
-				}
-			}
-		} else if compileFlag == true && commentFlag == true {
-			if input == ")" {
-				endComment()
-			}
+		let ignoreIndex = indicesToIgnore.contains(index)
+		
+		if ignoreIndex {
+			print("ignore word: " + input + " because index is: ", index)
 		} else {
-			if Int(input) != nil {
-				intStack.append(Int(input) ?? 0)
-			} else {
-				//check dictionary
-				if input == "show" {
-					print(intStack)
-				} else if input == "bye" {
-					return 0
-				} else if input == "+" {
-					add()
-				} else if input == "-" {
-					subtract()
-				} else if input == "*" {
-					multiply()
-				} else if input == "/" {
-					divide()
-				} else if input == "pop" {
-					pop()
-				} else if input == "=" {
-					equal()
-				} else if input == "<>" {
-					notEqual()
-				} else if input == "and" {
-					and()
-				} else if input == "or" {
-					or()
-				} else if input == ">" {
-					greaterThan()
-				} else if input == "<" {
-					lessThan()
-				} else if input == "dup" {
-					dup()
-				} else if input == "swap" {
-					swap()
-				} else if input == "2dup" {
-					twoDup()
-				} else if input == "rot" {
-					rot()
-				}
-				else if input == ":" {
-					startCompile()
-				} else if input == "immediate" {
-					let wordToRun = lastCompiledWord()
-					let runWordReturnCode = runWord(word: wordToRun)
-					if runWordReturnCode == 0 {
-						return 0
-					} else if runWordReturnCode == 1 {
-						return 1
-					} else if runWordReturnCode == 2 {
-						print("Error running compiled word.")
-						return 2
-					} else {
-						print("Error running compiled word.")
-						return 2
-					}
-				} else if input == "compiler" {
+			if compileFlag == true && commentFlag == false {
+				if input == "compiler" {
 					print(compiledWords)
 				} else if input == ";" {
-					print("not in compile mode")
-				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
-					let runWordReturnCode = runWord(word: input)
-					if runWordReturnCode == 0 {
-						return 0
-					} else if runWordReturnCode == 1 {
-					} else if runWordReturnCode == 2 {
-						print("Error running compiled word.")
-						return 2
+					endCompile()
+				} else if input == ":" {
+					print("Already in compile mode. Ingoring (:) operator.")
+				} else if input == "(" {
+					startComment()
+				}
+				else {
+					if index > 0 && input_array[index - 1] == ":" {
+						if Int(input) != nil {
+							print("Error: word name cannot be an integer.")
+							compileFlag = false
+							compiledWords.removeLast(4)
+							return 2
+						} else {
+							clearCompiledWord(word: input)
+							compile(input: input)
+						}
 					} else {
-						print("Error running compiled word.")
-						return 2
+						compile(input: input)
 					}
-				} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
-					let runWordReturnCode = runWord(word: input)
-					if runWordReturnCode == 0 {
-						return 0
-					} else if runWordReturnCode == 1 {
-					} else if runWordReturnCode == 2 {
-						print("Error running compiled word.")
-						return 2
-					} else {
-						print("Error running compiled word.")
-						return 2
-					}
-				} else if input == "" {
+				}
+			} else if compileFlag == true && commentFlag == true {
+				if input == ")" {
+					endComment()
+				}
+			} else {
+				if Int(input) != nil {
+					intStack.append(Int(input) ?? 0)
 				} else {
-					print("no matching word in dictionary for: " + input)
+					//check dictionary
+					if input == "show" {
+						print(intStack)
+					} else if input == "bye" {
+						return 0
+					} else if input == "+" {
+						add()
+					} else if input == "-" {
+						subtract()
+					} else if input == "*" {
+						multiply()
+					} else if input == "/" {
+						divide()
+					} else if input == "pop" {
+						pop()
+					} else if input == "=" {
+						equal()
+					} else if input == "<>" {
+						notEqual()
+					} else if input == "and" {
+						and()
+					} else if input == "or" {
+						or()
+					} else if input == ">" {
+						greaterThan()
+					} else if input == "<" {
+						lessThan()
+					} else if input == "dup" {
+						dup()
+					} else if input == "swap" {
+						swap()
+					} else if input == "2dup" {
+						twoDup()
+					} else if input == "rot" {
+						rot()
+					} else if input == "if" {
+						let stackEvalReturn = evaluateStack()
+						ifInputArray = processIfElse(stackEval: stackEvalReturn, index: index, input_array: ifInputArray, compiled: compiled)
+					}
+					else if input == ":" {
+						startCompile()
+					} else if input == "immediate" {
+						let wordToRun = lastCompiledWord()
+						let runWordReturnCode = runWord(word: wordToRun)
+						if runWordReturnCode == 0 {
+							return 0
+						} else if runWordReturnCode == 1 {
+							return 1
+						} else if runWordReturnCode == 2 {
+							print("Error running compiled word.")
+							return 2
+						} else {
+							print("Error running compiled word.")
+							return 2
+						}
+					} else if input == "compiler" {
+						print(compiledWords)
+					} else if input == ";" {
+						print("not in compile mode")
+					} else if compiledWords.contains(":::: " + input) && input != "" && compiled == true {
+						let runWordReturnCode = runWord(word: input)
+						if runWordReturnCode == 0 {
+							return 0
+						} else if runWordReturnCode == 1 {
+						} else if runWordReturnCode == 2 {
+							print("Error running compiled word.")
+							return 2
+						} else {
+							print("Error running compiled word.")
+							return 2
+						}
+					} else if compiledWords.contains(":::: " + input) && input != "" && compiled == false {
+						let runWordReturnCode = runWord(word: input)
+						if runWordReturnCode == 0 {
+							return 0
+						} else if runWordReturnCode == 1 {
+						} else if runWordReturnCode == 2 {
+							print("Error running compiled word.")
+							return 2
+						} else {
+							print("Error running compiled word.")
+							return 2
+						}
+					} else if input == "" {
+					} else {
+						print("no matching word in dictionary for: " + input)
+					}
 				}
 			}
 		}
@@ -389,5 +402,104 @@ func rot() {
 	intStack.append(thirdWord)
 }
 
-func ifElse() {
+func evaluateStack() -> Int {
+	if intStack.count > 0 {
+		let topWord: Int = intStack.removeLast()
+		if topWord < 0 {
+			return 1
+		} else {
+			return 0
+		}
+	} else {
+		print("no value on stack to compare.")
+		return 2
+	}
+}
+
+func processIfElse(stackEval: Int, index: Int, input_array: [String], compiled: Bool) -> [String] {
+	var ifThenArray: [String] = []
+	var ifInputArray = input_array
+	var ifIndex: Int = 0
+	// : bob 0 if 20 else 0 if 30 else 40 then then ;
+	if compiled == true {
+		switch stackEval {
+		case 0:
+			// top value was > -1, so consider as FALSE
+			if let ifIndexPre = input_array.firstIndex(of: "if") {
+				ifIndex = ifIndexPre
+			} else {
+				print("Error: no IF found.")
+				return []
+			}
+			
+			if let thenIndex = input_array.lastIndex(of: "then") {
+				ifThenArray = Array(input_array[ifIndex...thenIndex])
+			} else {
+				print("Error: missing THEN clause.")
+				return []
+			}
+			
+			// handle nested if statements
+			let ifCount = ifThenArray.filter{$0 == "if"}.count
+			var thenIndices: [Int] = []
+			var elseIndices: [Int] = []
+			var ifIndices: [Int] = []
+			var ifThenMap: [String] = []
+			
+			for (index, input) in input_array.enumerated() {
+				if input == "then" {
+					thenIndices.append(index)
+					ifThenMap.append(input)
+				} else if input == "else" {
+					elseIndices.append(index)
+					ifThenMap.append(input)
+				} else if input == "if" {
+					ifIndices.append(index)
+					ifThenMap.append(input)
+				}
+			}
+			
+			let matchingThen = thenIndices[ifCount - 1]
+			indicesToIgnore.append(matchingThen)
+			ifInputArray[matchingThen] = ""
+			
+			if ifThenMap[1] == "if" {
+				for each in 0...matchingThen - 1 {
+					ifInputArray[each] = ""
+					indicesToIgnore.append(each)
+				}
+			} else if ifThenMap[1] == "then" {
+				for each in 0...matchingThen - 1 {
+					ifInputArray[each] = ""
+					indicesToIgnore.append(each)
+				}
+			} else if ifThenMap[1] == "else" {
+				if let firstElse = ifInputArray.firstIndex(of: "else") {
+					for each in 0...firstElse {
+						indicesToIgnore.append(each)
+						ifInputArray[each] = ""
+					}
+				}
+			} else {
+				print("Error with ifThenMap.")
+				return []
+			}
+			
+			return ifInputArray
+						
+		case 1:
+			// TRUE
+			print("if statement evaluated to TRUE")
+			return ifInputArray
+		case 2:
+			print("error")
+			return ifInputArray
+		default:
+			print("unsure")
+			return ifInputArray
+		}
+	} else {
+		print("Cannot interpret a compile-only word.")
+		return []
+	}
 }
