@@ -417,13 +417,95 @@ func rot() {
 }
 
 func ifIf() {
-	
+	var conditionBool: Bool
+	var currentNestIsReadable: Bool
+	if controlFlowStack.count > 0 {
+		if let x = controlFlowStack.last {
+			currentNestIsReadable = x
+		} else {
+			print("Error with control flow stack value checking on IF.")
+			return
+		}
+		if currentNestIsReadable {
+			if intStack.count > 0 {
+				let conditionValue = intStack.removeLast()
+				if conditionValue > -1 {
+					conditionBool = false
+				} else {
+					conditionBool = true
+				}
+			} else {
+				print("No value on integer stack. Using value of current nest.")
+				conditionBool = currentNestIsReadable
+			}
+		} else {
+			conditionBool = false
+		}
+	} else {
+		if intStack.count > 0 {
+			let conditionValue = intStack.removeLast()
+			if conditionValue > -1 {
+				conditionBool = false
+			} else {
+				conditionBool = true
+			}
+		} else {
+			print("No value on integer stack. Assuming -1 (TRUE).")
+			conditionBool = true
+		}
+	}
+	controlFlowStack.append(conditionBool)
 }
 
 func ifElse() {
-	
+	var currentNestIsReadable: Bool
+	var parentNestIsReadable: Bool
+	if controlFlowStack.count > 0 {
+		if let x = controlFlowStack.last {
+			currentNestIsReadable = x
+			if currentNestIsReadable {
+				if x == true {
+					controlFlowStack.removeLast()
+					controlFlowStack.append(false)
+				} else {
+					controlFlowStack.removeLast()
+					controlFlowStack.append(true)
+				}
+			} else {
+				if controlFlowStack.count > 1 {
+					let secondToLast = controlFlowStack.count - 2
+					if controlFlowStack[secondToLast] {
+						parentNestIsReadable = true
+					} else {
+						parentNestIsReadable = false
+					}
+					
+					if parentNestIsReadable {
+						controlFlowStack.removeLast()
+						controlFlowStack.append(true)
+					} else {
+						
+					}
+				} else {
+					controlFlowStack.removeLast()
+					controlFlowStack.append(true)
+				}
+			}
+		} else {
+			print("Error: unable to read last value on control flow stack.")
+			return
+		}
+	} else {
+		print("Error: No value on control flow stack. ELSE should preceded by IF.")
+		return
+	}
 }
 
 func ifThen() {
-	
+	if controlFlowStack.count > 0 {
+		controlFlowStack.removeLast()
+	} else {
+		print("Error: control flow stack is empty. THEN should be preceded by IF or ELSE.")
+		return
+	}
 }
