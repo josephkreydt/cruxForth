@@ -509,3 +509,10 @@ func ifThen() {
 		return
 	}
 }
+
+// LOOPING WITH FORTH, WITHOUT WHILE, OR DO, OR BEGIN UNTIL, ETC.
+// : loop1 1 - dup 0 = if else loop2 then ;
+// : loop2 1 - dup 0 = if else loop1 then ;
+// 5
+// loop1
+// replicates results from loop in: https://www.youtube.com/watch?v=cDDMtXL1mXM&t=274s
