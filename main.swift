@@ -348,7 +348,7 @@ func notEqual() {
 func and() {
 	let topWord: Int = intStack.removeLast()
 	let secondWord: Int = intStack.removeLast()
-	if (topWord == secondWord) {
+	if (topWord != 0 && topWord == secondWord) {
 		intStack.append(-1)
 	} else {
 		intStack.append(0)
